@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        input {
+            padding: 10px;
+            margin: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>ഫോൺ നമ്പർ വെരിഫിക്കേഷൻ</h1>
+    <form id="verificationForm">
+        <input type="text" id="phone" placeholder="ഫോൺ നമ്പർ നൽകുക (10 ഡിജിറ്റുകൾ)" required>
+        <button type="button" onclick="sendOTP()">OTP അയക്കുക</button>
+    </form>
+    <div id="otpSection" style="display: none;">
+        <input type="text" id="otp" placeholder="OTP നൽകുക" required>
+        <button type="button" onclick="verifyOTP()">OTP വെരിഫൈ ചെയ്യുക</button>
+    </div>
+    <p id="message"></p>
+
+    <script>
+        async function sendOTP() {
+            const phone = document.getElementById('phone').value;
+            if (!phone || phone.length !== 10) {
+                alert('സരിയായ ഫോൺ നമ്പർ നൽകുക!');
+                return;
+            }
+            const response = await fetch('/api/send-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone })
+            });
+            const data = await response.json();
+            if (data.status === 'success') {
+                document.getElementById('otpSection').style.display = 'block';
+                document.getElementById('message').innerText = 'OTP അയച്ചു.';
+            } else {
+                document.getElementById('message').innerText = 'OTP അയക്കാൻ പറ്റിയില്ല.';
+            }
+        }
+
+        async function verifyOTP() {
+            const phone = document.getElementById('phone').value;
+            const otp = document.getElementById('otp').value;
+            const response = await fetch('/api/verify-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone, otp })
+            });
+            const data = await response.json();
+            if (data.status === 'success') {
+                document.getElementById('message').innerText = 'OTP വെരിഫൈ ചെയ്തു.';
+            } else {
+                document.getElementById('message').innerText = 'OTP വെരിഫൈ പരാജയപ്പെട്ടു.';
+            }
+        }
+    </script>
+</body>
+</html>
